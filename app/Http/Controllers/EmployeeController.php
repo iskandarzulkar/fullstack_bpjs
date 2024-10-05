@@ -98,10 +98,15 @@ class EmployeeController extends Controller
 
     public function exportCsv()
     {
-        $job = new ExportCsvJob();
-        dispatch($job);
-        
-        return response()->json(['message' => 'CSV export is being processed.']);
+        $dataEmploye = Employee::all();
+        dd($dataEmploye);
+        // dd(new ExportCsvJob());
+        // $job = new ExportCsvJob();
+
+        // dispatch($job);
+
+        // die();
+        // return response()->json(['message' => 'CSV export is being processed.']);
     }
 
     public function exportPdf()

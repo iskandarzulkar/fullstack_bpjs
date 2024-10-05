@@ -13,6 +13,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
+
     <div class="container">
         <table class="table table-bordered ">
             <thead>
@@ -30,7 +31,7 @@
             </tbody>
             <tbody id="loading" style="display:none;">
                 <tr>
-                    <td><?=$no;?></div>
+                    <td>Loading...</div>
                     <td>Loading...</div>
                     <td>Loading...</div>
                     <td>Loading...</div>
@@ -46,7 +47,7 @@
 
 
     <script>
-        <?= $no   = 1; ?>
+       
         let page  = 1;
         let no    = 1;
         function loadData() {
@@ -61,9 +62,8 @@
                     $('#loading').hide();
                     if (data.data.length > 0) {
                         data.data.forEach(function(item) {
-                            <?= $no++ ?>
                             $('#data-body').append('<tr>' +
-                            '<td>' + $no++ + '</td>' + 
+                            '<td>' + no++ + '</td>' + 
                             '<td>' + item.firstname + '</td>' + 
                             '<td>' + item.lastname + '</td>' + 
                             '<td>' + item.email + '</td>' + 

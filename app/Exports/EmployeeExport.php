@@ -10,6 +10,7 @@ class EmployeeExport implements FromQuery, WithHeadings
 {
     public function query()
     {
+        dd(Employee::query());
         return Employee::query(); // Adjust as needed
     }
 
