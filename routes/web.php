@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [\App\Http\Controllers\EmployeeController::class, 'index'])->name('index');
+Route::get('/create', [\App\Http\Controllers\EmployeeController::class, 'createFakerData'])->name('faker');
+Route::get('/data/load', [\App\Http\Controllers\EmployeeController::class, 'getDataEmploye'])->name('load');
+Route::get('/export-csv', [\App\Http\Controllers\EmployeeController::class, 'exportCsv'])->name('export-csv');
+Route::get('/export-pdf', [\App\Http\Controllers\EmployeeController::class, 'exportPdf'])->name('export-pdf');

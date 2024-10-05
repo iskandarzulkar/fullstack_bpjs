@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Facker\Factory as Faker;
+use DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,11 +16,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // \App\Models\Employee::factory(100000)->create();
+        // \App\Models\Department::factory(6)->create();
     }
 }
+ 
