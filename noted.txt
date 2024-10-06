@@ -1,0 +1,2 @@
+before que = 15.74 detik
+after que  = 

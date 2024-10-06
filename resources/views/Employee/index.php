@@ -9,37 +9,69 @@
     <link href="assets/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <!-- <link href='assets/css/bootstrap.css' rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
     <script src='assets/js/bootstrap.bundle.min.js' integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        .container{
+            margin-top:10px;
+        }
+        .row{
+            margin : 5px;
+        }
+    </style>
 </head>
 <body>
 
     <div class="container">
-        <table class="table table-bordered ">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First Name</th>
-                    <th scope="col">Last Name</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Address</th>
-                    <th scope="col">Department</th>
-                </tr>
-            </thead>
-            <tbody id="data-body">
-    
-            </tbody>
-            <tbody id="loading" style="display:none;">
-                <tr>
-                    <td>Loading...</div>
-                    <td>Loading...</div>
-                    <td>Loading...</div>
-                    <td>Loading...</div>
-                    <td>Loading...</div>
-                    <td>Loading...</div>
-                </tr>
-            </tbody>
-        </table>
+        <div class="row">
+            <div class="col-md-3">
+                <button type="button" class="btn btn-primary"><i class="fa fa-file-pdf-o" aria-hidden="true"> Export PDF</i></button>
+                <button type="button" class="btn btn-primary"><i class="fa fa-file-excel-o"></i> Export CSV</i></button>
+                <!-- <button>export</button> -->
+            </div>
+            <div class="col-md-3">
+                <button type="button" class="btn btn-success" onClick="faker()">Faker Data</button>
+            </div>
+        </div>
+        <div class="row">
+            <div id="progress" class="mt-3" style="display: none;">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" id="progress-bar"></div>
+                </div>
+                <span id="progress-text"></span>
+            </div>
+        </div>
+        <div class="row">
+            <table class="table table-bordered ">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Department</th>
+                    </tr>
+                </thead>
+                <tbody id="data-body">
+        
+                </tbody>
+                <tbody id="loading" style="display:none;">
+                    <tr>
+                        <td></td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <!-- <div id="loading" style="display:none;">Loading...</div> -->
 
@@ -47,10 +79,48 @@
 
 
     <script>
-       
+        
+        function faker()
+        {
+            $('#progress').show();
+            $('#progress-bar').css('width', '0%');
+            $('#progress-text').text('');
+
+            let progressInterval = setInterval(function() {
+                let currentWidth = parseInt($('#progress-bar').css('width')) / parseInt($('#progress').css('width')) * 100;
+                if (currentWidth < 90) {
+                    $('#progress-bar').css('width', (currentWidth + 10) + '%');
+                } else {
+                    clearInterval(progressInterval);
+                }
+            }, 100);
+
+            $.ajax({
+                url: '/create',
+                method: 'get',
+                data: $(this).serialize(),
+                success: function(res) {
+                    clearInterval(progressInterval);
+                    $('#progress-bar').css('width', '100%');
+                    $('#progress-text').text('Data FAKER added successfully!, with time : ' + res.time +' second');
+                },
+                error: function(xhr) {
+                    clearInterval(progressInterval);
+                    $('#progress-bar').css('width', '100%');
+                    $('#progress-text').text('Error adding data.');
+                },
+                complete: function() {
+                    setTimeout(function() {
+                            $('#progress').hide();
+                    }, 15000); 
+                }
+            });
+                
+        }
+
         let page  = 1;
         let no    = 1;
-        function loadData() {
+        function loadData(page) {
             $.ajax({
                 url: '/data/load?page=' + page,
                 type: 'GET',
@@ -78,6 +148,8 @@
                 }
             });
         }
+
+        loadData(page); 
 
         $(window).scroll(function() {
             if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
