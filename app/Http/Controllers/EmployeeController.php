@@ -15,6 +15,7 @@ use App\Jobs\TestGeneratePdf;
 use App\Models\Hit;
 use App\Models\Department;
 use App\Models\Employee;
+use Illuminate\Support\Facades\Storage;
 
 use PDF;
 
@@ -60,11 +61,10 @@ class EmployeeController extends Controller
         //     ['count' => \DB::raw('count + 1')]
         // );
 
-        
         $chunkSize      = 1000;
         $totalRecord    = Employee::count();
         $numberOfChunk  = ceil($totalRecord /$chunkSize);
-        
+ 
         for ($i=0; $i < $numberOfChunk ; $i += $chunkSize) { 
             GeneratePdfChunk::dispatch($i * $chunkSize, $chunkSize, $i);
         }
@@ -85,11 +85,15 @@ class EmployeeController extends Controller
 
     public function textGenereatePdf()
     {
-        // Define how many records to process in total (200 million)
-        $totalRecords = 1000;
+        $files       = Storage::disk('public')->files('/reports');
+        $fileCount  = count($files);
 
-        // Process the records in chunks (e.g., batches of 100,000)
-        $chunkSize = 200;
+        foreach ($files as $file) {
+            Storage::disk('public')->delete($file);
+        }
+
+        $totalRecords   = 1000;
+        $chunkSize      = 200;
 
         for ($i = 0; $i < $totalRecords; $i += $chunkSize) {
             TestGeneratePdf::dispatch($i, $i + $chunkSize - 1);

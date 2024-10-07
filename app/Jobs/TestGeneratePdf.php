@@ -8,7 +8,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-// use Webklex\PDFMerger\Facades\PDFMergerFacade as PDFMerger;
 
 use Illuminate\Support\Facades\Storage;
 use iio\libmergepdf\Merger;
@@ -18,50 +17,14 @@ class TestGeneratePdf implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    // protected $data;
-
-    // public function __construct($data)
-    // {
-    //     $this->data = $data;
-    // }
-
-    // public function handle()
-    // {
-    //     // Example: You might want to chunk the data to avoid memory issues
-    //     $pdfData = [];
-
-    //     foreach ($this->data as $record) {
-    //         $pdfData[] = $record;
-
-    //         // To avoid using too much memory, consider creating multiple PDFs or chunking the data
-    //         if (count($pdfData) >= 10000) { // For example, process in chunks of 10,000
-    //             $this->createPdf($pdfData);
-    //             $pdfData = []; // Reset the array
-    //         }
-    //     }
-
-    //     // Handle any remaining data
-    //     if (!empty($pdfData)) {
-    //         $this->createPdf($pdfData);
-    //     }
-    // }
-
-    // protected function createPdf($data)
-    // {
-    //     // Generate the PDF with the provided data
-    //     $pdf = PDF::loadView('Test.template', ['data' => $data]);
-    //     $pdf->save(storage_path("app/public/reports/report_".time().".pdf")); // Save to storage
-    // }
-
-
-    protected $start;
-    protected $end;
-
     /**
      * Create a new job instance.
      *
      * @return void
      */
+    protected $start;
+    protected $end;
+
     public function __construct($start, $end)
     {
         $this->start = $start;
@@ -88,13 +51,12 @@ class TestGeneratePdf implements ShouldQueue
 
             $batchFileName = "/public/reports/batch_".$i."_to_" . $i + 999 .".pdf";
             Storage::put($batchFileName, $pdf);
-            $pdfMerger->addRaw(Storage::get($batchFileName));
-            $files = Storage::disk('/public/reports/')->files($directoryPath);
+            // $pdfMerger->addRaw(Storage::get($batchFileName));
         }
-        
-        $mergedPdf = $pdfMerger->merge();
 
-        Storage::put('/public/reports/final_merged_output.pdf', $mergedPdf);
+        // $mergedPdf = $pdfMerger->merge();
+        // Storage::put('/public/reports/final_merged_output.pdf', $mergedPdf);
+        
     }
 
     protected function generateData($start, $end)

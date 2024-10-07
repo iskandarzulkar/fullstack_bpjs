@@ -84,6 +84,11 @@ return [
     |
     */
 
+    'worker' => [
+        'timeout' => 1000,  // Set a longer timeout
+        'memory'  => 5000,  // Allocate more memory
+    ],
+
     'failed' => [
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
         'database' => env('DB_CONNECTION', 'mysql'),
