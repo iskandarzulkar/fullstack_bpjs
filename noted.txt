@@ -1,2 +1,6 @@
 before que = 15.74 detik
 after que  = 
+
+run php artisan queue:work
+php artisan queue:work --stop-when-empty
+php artisan queue:listen

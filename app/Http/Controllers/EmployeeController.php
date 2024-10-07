@@ -3,18 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Department;
-use App\Models\Employee;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use App\Jobs\CreateExportFile;
 
-use App\Jobs\ExportCsvJob;
-use App\Jobs\ExportPdfJob;
 use App\Jobs\FakerEmployeeJob;
+use App\Jobs\GeneratePdfChunk;
+use App\Jobs\MergePdfChunks;
 
+use App\Jobs\TestGeneratePdf;
 
+use App\Models\Hit;
+use App\Models\Department;
+use App\Models\Employee;
 
+use PDF;
 
 class EmployeeController extends Controller
 {
@@ -49,53 +51,81 @@ class EmployeeController extends Controller
         return response()->json(['success' => true, 'time' => sprintf('%0.2f', $timediff)]);
     }
 
-    // public function exportCsv()
-    // {
-    //     $chunkSize  = 10000;
-
-    //     $countData  = Cache::remember('count-employe', 60, function () {
-    //         return Employee::count();    
-    //     }); 
-
-    //     $numberOfChunk = ceil($countData / $chunkSize);
-
-    //     $folder = now()->toDateString() . '-' . str_replace(':', '-', now()->toTimeString());
-        
-    //     $batches = [
-    //         new CreateExportFile($chunkSize, $folder)
-    //     ];
-
-    //     dd($countData);
-
-    //     $dataEmploye = Cache::remember('all-employe', 60, function () {
-    //         return  DB::table('employees')
-    //                 ->join('departments',  'employees.id_department', '=', 'departments.id')
-    //                 ->select('employees.*', 'departments.name')
-    //                 ->get();
-    //     });
-
-    //     dd($dataEmploye);
-
-    // }
-
-    public function exportCsv()
-    {
-        $dataEmploye = Employee::all();
-        dd($dataEmploye);
-        // dd(new ExportCsvJob());
-        // $job = new ExportCsvJob();
-
-        // dispatch($job);
-
-        // die();
-        // return response()->json(['message' => 'CSV export is being processed.']);
-    }
-
     public function exportPdf()
     {
-        $job = new ExportPdfJob();
-        dispatch($job);
+        // $endpoint = '/Export-PDF';
+
+        // Hit::updateOrCreate(
+        //     ['endpoint' => $endpoint],
+        //     ['count' => \DB::raw('count + 1')]
+        // );
+
+        
+        $chunkSize      = 1000;
+        $totalRecord    = Employee::count();
+        $numberOfChunk  = ceil($totalRecord /$chunkSize);
+        
+        for ($i=0; $i < $numberOfChunk ; $i += $chunkSize) { 
+            GeneratePdfChunk::dispatch($i * $chunkSize, $chunkSize, $i);
+        }
+
+        // for ($i=0; $i < $numberOfChunk ; $i += $chunkSize) { 
+        //     $filePath = storage_path("app/public/exports/exported_chunk_{$i}.pdf");
+        //     if (file_exists($filePath)) {
+        //         // $merger->addFile($filePath);
+        //         MergePdfChunks::dispatch($i * $chunkSize, $chunkSize, $i);
+        //     } else {
+        //         \Log::error("File not found for merging: " . $filePath);
+        //     }
+        // }
+        
         
         return response()->json(['message' => 'PDF export is being processed.']);
     }
+
+    public function textGenereatePdf()
+    {
+        // Define how many records to process in total (200 million)
+        $totalRecords = 1000;
+
+        // Process the records in chunks (e.g., batches of 100,000)
+        $chunkSize = 200;
+
+        for ($i = 0; $i < $totalRecords; $i += $chunkSize) {
+            TestGeneratePdf::dispatch($i, $i + $chunkSize - 1);
+        }
+
+        return response()->json(['message' => 'PDF generation and merging has started.']);
+
+    }
+
+    // public function textGenereatePdf()
+    // {
+    //     ini_set('memory_limit', '1G');
+    //     ini_set('max_execution_time', 0);
+        
+    //     $data = []; // Fetch or generate your 200 million records here
+
+    //     // For demonstration, let's assume we only need the structure here
+    //     for ($i = 1; $i <= 10000; $i++) {
+    //         $data[] = (object)[
+    //             'id' => $i,
+    //             'name' => 'User ' . $i,
+    //             'email' => 'user' . $i . '@example.com'
+    //         ];
+            
+    //         // Dispatch the job every certain amount of data to avoid memory issues
+    //         if (count($data) >= 100) {
+    //             TestGeneratePdf::dispatch($data);
+    //             $data = []; // Reset the array
+    //         }
+    //     }
+
+    //     // Handle any remaining data
+    //     if (!empty($data)) {
+    //         TestGeneratePdf::dispatch($data);
+    //     }
+
+    //     return response()->json(['message' => 'PDF generation started']);
+    // }
 }

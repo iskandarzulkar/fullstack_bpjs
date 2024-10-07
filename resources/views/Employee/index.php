@@ -6,9 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>List 200.000.000 Display Data</title>
 
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <!-- <link href='assets/css/bootstrap.css' rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
-    <script src='assets/js/bootstrap.bundle.min.js' integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
@@ -29,9 +28,8 @@
     <div class="container">
         <div class="row">
             <div class="col-md-3">
-                <button type="button" class="btn btn-primary"><i class="fa fa-file-pdf-o" aria-hidden="true"> Export PDF</i></button>
-                <button type="button" class="btn btn-primary"><i class="fa fa-file-excel-o"></i> Export CSV</i></button>
-                <!-- <button>export</button> -->
+                <a href="/export-pdf" class="btn btn-primary" target="_blank">CETAK PDF</a>
+                <a href="/generate-pdf" class="btn btn-primary" target="_blank">CETAK PDF 2</a>
             </div>
             <div class="col-md-3">
                 <button type="button" class="btn btn-success" onClick="faker()">Faker Data</button>
@@ -72,14 +70,11 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- <div id="loading" style="display:none;">Loading...</div> -->
-
     </div>
 
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script>
-        
         function faker()
         {
             $('#progress').show();
@@ -111,7 +106,9 @@
                 },
                 complete: function() {
                     setTimeout(function() {
-                            $('#progress').hide();
+                        $('#progress-bar').css('width', '0%');
+                        $('#progress-text').text('');
+                        $('#progress').hide();
                     }, 15000); 
                 }
             });

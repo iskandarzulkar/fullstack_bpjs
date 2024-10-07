@@ -35,6 +35,9 @@ class FakerEmployeeJob implements ShouldQueue
      */
     public function handle()
     {
+        ini_set('memory_limit', '1G');
+        ini_set('max_execution_time', 0);
+        
         $batchSize      = 1000; 
         $totalRecords   = 150000; 
         // $totalRecords = 200000000;

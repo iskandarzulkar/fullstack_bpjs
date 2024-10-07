@@ -15,5 +15,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [\App\Http\Controllers\EmployeeController::class, 'index'])->name('index');
 Route::get('/create', [\App\Http\Controllers\EmployeeController::class, 'createFakerData'])->name('faker');
 Route::get('/data/load', [\App\Http\Controllers\EmployeeController::class, 'getDataEmploye'])->name('load');
-Route::get('/export-csv', [\App\Http\Controllers\EmployeeController::class, 'exportCsv'])->name('export-csv');
 Route::get('/export-pdf', [\App\Http\Controllers\EmployeeController::class, 'exportPdf'])->name('export-pdf');
+Route::get('/generate-pdf', [\App\Http\Controllers\EmployeeController::class, 'textGenereatePdf'])->name('test-pdf');
