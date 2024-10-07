@@ -29,7 +29,8 @@
         <div class="row">
             <div class="col-md-3">
                 <a href="/export-pdf" class="btn btn-primary" target="_blank">CETAK PDF</a>
-                <a href="/generate-pdf" class="btn btn-primary" target="_blank">CETAK PDF 2</a>
+                <button type="button" class="btn btn-success" onClick="sampleGenerate()">Exm Merge</button>
+                <!-- <a href="/generate-pdf" class="btn btn-primary" target="_blank">CETAK PDF 2</a> -->
             </div>
             <div class="col-md-3">
                 <button type="button" class="btn btn-success" onClick="faker()">Faker Data</button>
@@ -114,6 +115,60 @@
             });
                 
         }
+
+        function sampleGenerate()
+        {
+            $.ajax({
+                url: '/generate-pdf',
+                type: 'GET',
+                success: function(response) {
+                    console.log(response.message);
+                    if (response.download_url) {
+                        // Optionally, show a link to download the merged PDF
+                        alert('PDFs Merged Successfully. Download the merged PDF.');
+                    }
+                },
+                error: function(error) {
+                    console.log('Error occurred:', error);
+                }
+            });
+
+            pollProgressTest();
+        }
+
+        function pollProgressTest()
+        {
+            $('#progress').show();
+            $('#progress-bar').css('width', '0%');
+            $('#progress-text').text('');
+
+            var interval = setInterval(function() {
+                $.ajax({
+                    url: '/progress-test',
+                    type: 'GET',
+                    success: function(data) {
+                        console.log('Progress:', data.progress + '%');
+                   
+                        $('#progress-bar').css('width', data.progress + '%');
+                        $('#progress-text').text('Progress: ' + data.progress + '%');
+
+                        if (data.progress === 100) {
+                            $('#progress').hide();
+                            $('#progress-bar').css('width', '0%');
+                            $('#progress-text').text('');
+                            clearInterval(interval);
+                        }
+                    },
+                    error: function(error) {
+                        $('#progress').hide();
+                        $('#progress-bar').css('width', '0%');
+                        $('#progress-text').text('');
+                        console.log('Error occurred while fetching progress:', error);
+                    }
+                });
+            }, 10000);
+        }
+
 
         let page  = 1;
         let no    = 1;

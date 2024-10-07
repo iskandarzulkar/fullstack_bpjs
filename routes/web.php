@@ -17,3 +17,4 @@ Route::get('/create', [\App\Http\Controllers\EmployeeController::class, 'createF
 Route::get('/data/load', [\App\Http\Controllers\EmployeeController::class, 'getDataEmploye'])->name('load');
 Route::get('/export-pdf', [\App\Http\Controllers\EmployeeController::class, 'exportPdf'])->name('export-pdf');
 Route::get('/generate-pdf', [\App\Http\Controllers\EmployeeController::class, 'textGenereatePdf'])->name('test-pdf');
+Route::get('/progress-test', [\App\Http\Controllers\EmployeeController::class, 'getProgressGenerateTest'])->name('progress-test');

@@ -17,6 +17,8 @@ use App\Models\Department;
 use App\Models\Employee;
 use Illuminate\Support\Facades\Storage;
 
+use iio\libmergepdf\Merger;
+
 use PDF;
 
 class EmployeeController extends Controller
@@ -99,8 +101,50 @@ class EmployeeController extends Controller
             TestGeneratePdf::dispatch($i, $i + $chunkSize - 1);
         }
 
-        return response()->json(['message' => 'PDF generation and merging has started.']);
+        $totalFiles = $totalRecords / $chunkSize;
+        
+        $cacheKey = 'pdf_merge_progress'; 
+        Cache::put($cacheKey, 0); 
 
+        if($fileCount <= $totalFiles ){
+            
+            // Storage file pdf on folder
+            $folderPath = '/public/reports';
+            $pdfFiles   = Storage::files($folderPath);
+            
+            // Filter only PDF files
+            $pdfFiles = array_filter($pdfFiles, function ($file) {
+                return pathinfo($file, PATHINFO_EXTENSION) === 'pdf';
+            });
+
+            $merger = new Merger;
+
+            // Add each PDF file to the merger
+            foreach ($pdfFiles as $index => $pdfFile) {
+
+                $fileContent = Storage::get($pdfFile);
+                $merger->addRaw($fileContent);
+
+                $progress = intval((($index + 1) / $totalFiles) * 100); 
+                Cache::put($cacheKey, $progress); 
+
+            }
+
+            Cache::put($cacheKey, 100);
+        }
+
+        $mergedPdf      = $merger->merge();
+        $mergedPdfPath  = Storage::disk('public')->put('/merger/merged_report.pdf', $mergedPdf);
+
+        return response()->json(['message' => 'PDFs Merged Successfully', 'download_url' => storage_path('app/public/merger/merged_report.pdf')]);
+        // return response()->download(storage_path('app/public/merger/merged_report.pdf'));
+
+    }
+
+    public function getProgressGenerateTest()
+    {
+        $progress = Cache::get('pdf_merge_progress', 0);
+        return response()->json(['progress' => $progress]);
     }
 
     // public function textGenereatePdf()
