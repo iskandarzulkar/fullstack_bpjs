@@ -10,6 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use iio\libmergepdf\Merger;
 use PDF;
 
@@ -24,11 +25,15 @@ class TestGeneratePdf implements ShouldQueue
      */
     protected $start;
     protected $end;
+    protected $totalRecords;
+    protected $sumRecord;
 
-    public function __construct($start, $end)
+    public function __construct($start, $end, $totalRecords, $sumRecord)
     {
-        $this->start = $start;
-        $this->end = $end;
+        $this->start        = $start;
+        $this->end          = $end;
+        $this->totalRecords = $totalRecords;
+        $this->sumRecord    = $sumRecord;
     }
 
     /**
@@ -43,16 +48,26 @@ class TestGeneratePdf implements ShouldQueue
 
         $pdfMerger = new Merger();
         
+        $cacheKey = 'pdf_merge_progress'; 
+        Cache::put($cacheKey, 0); 
+
         for ($i = $this->start; $i <= $this->end; $i += 1000) {
-    
+
             $data = $this->generateData($i, $i + 999);
 
             $pdf = PDF::loadView('Test.template', compact('data'))->output();
 
             $batchFileName = "/public/reports/batch_".$i."_to_" . $i + 999 .".pdf";
             Storage::put($batchFileName, $pdf);
+
+            // Cache count
+            $cacheKey = 'pdf_merge_progress'; 
+            $progress = intval(($this->sumRecord / $this->totalRecords) * 100);
+            Cache::put($cacheKey, $progress);
+
             // $pdfMerger->addRaw(Storage::get($batchFileName));
         }
+        Cache::put($cacheKey, 100);
 
         // $mergedPdf = $pdfMerger->merge();
         // Storage::put('/public/reports/final_merged_output.pdf', $mergedPdf);

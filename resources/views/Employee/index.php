@@ -122,10 +122,10 @@
                 url: '/generate-pdf',
                 type: 'GET',
                 success: function(response) {
-                    console.log(response.message);
+                    console.log(response);
                     if (response.download_url) {
                         // Optionally, show a link to download the merged PDF
-                        alert('PDFs Merged Successfully. Download the merged PDF.');
+                        // alert('PDFs Merged Successfully. Download the merged PDF.');
                     }
                 },
                 error: function(error) {
@@ -166,7 +166,7 @@
                         console.log('Error occurred while fetching progress:', error);
                     }
                 });
-            }, 10000);
+            }, 2000);
         }
 
 

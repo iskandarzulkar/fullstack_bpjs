@@ -87,7 +87,7 @@ class EmployeeController extends Controller
 
     public function textGenereatePdf()
     {
-        $files       = Storage::disk('public')->files('/reports');
+        $files      = Storage::disk('public')->files('/reports');
         $fileCount  = count($files);
 
         foreach ($files as $file) {
@@ -97,14 +97,15 @@ class EmployeeController extends Controller
         $totalRecords   = 1000;
         $chunkSize      = 200;
 
+        // $progress = intval(($this->totalRecords / $records) * 100);
+        
         for ($i = 0; $i < $totalRecords; $i += $chunkSize) {
-            TestGeneratePdf::dispatch($i, $i + $chunkSize - 1);
+            $sumRecord = ($i+ + $chunkSize);
+            TestGeneratePdf::dispatch($i, $i + $chunkSize - 1, $totalRecords, $sumRecord);
+            // TestGeneratePdf::dispatch($i, $i + $chunkSize - 1, $totalRecords, $sumRecord);
         }
 
         $totalFiles = $totalRecords / $chunkSize;
-        
-        $cacheKey = 'pdf_merge_progress'; 
-        Cache::put($cacheKey, 0); 
 
         if($fileCount <= $totalFiles ){
             
@@ -125,18 +126,14 @@ class EmployeeController extends Controller
                 $fileContent = Storage::get($pdfFile);
                 $merger->addRaw($fileContent);
 
-                $progress = intval((($index + 1) / $totalFiles) * 100); 
-                Cache::put($cacheKey, $progress); 
-
             }
 
-            Cache::put($cacheKey, 100);
+            $mergedPdf      = $merger->merge();
+            $mergedPdfPath  = Storage::disk('public')->put('/merger/merged_report.pdf', $mergedPdf);
+            
+            return response()->json(['message' => 'PDFs Merged Successfully', 'download_url' => storage_path('app/public/merger/merged_report.pdf')]);
         }
 
-        $mergedPdf      = $merger->merge();
-        $mergedPdfPath  = Storage::disk('public')->put('/merger/merged_report.pdf', $mergedPdf);
-
-        return response()->json(['message' => 'PDFs Merged Successfully', 'download_url' => storage_path('app/public/merger/merged_report.pdf')]);
         // return response()->download(storage_path('app/public/merger/merged_report.pdf'));
 
     }
