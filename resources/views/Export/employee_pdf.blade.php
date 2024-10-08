@@ -19,6 +19,7 @@
 		<thead>
 			<tr>
 				<th>No</th>
+				<th>ID</th>
 				<th>Firstname</th>
 				<th>Lastname</th>
 				<th>Email</th>
@@ -30,10 +31,11 @@
             <?php 
                 $i= 1;
                 
-                foreach ($employee as $emp) {
+                foreach ($data as $emp) {
             ?>
                 <tr>
                     <td><?= $i++ ?></td>
+                    <td><?= $emp->id ?></td>
                     <td><?= $emp->firstname ?></td>
                     <td><?= $emp->lastname ?></td>
                     <td><?= $emp->email ?></td>

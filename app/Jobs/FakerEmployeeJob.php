@@ -39,6 +39,7 @@ class FakerEmployeeJob implements ShouldQueue
         ini_set('max_execution_time', 0);
         
         $batchSize      = 1000; 
+        // $totalRecords   = 3000;
         $totalRecords   = 150000; 
         // $totalRecords = 200000000;
         $faker          = Faker::create();

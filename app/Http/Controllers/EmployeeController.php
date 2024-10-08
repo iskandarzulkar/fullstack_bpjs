@@ -12,6 +12,7 @@ use App\Jobs\MergePdfChunks;
 
 use App\Jobs\TestGeneratePdf;
 
+use App\Models\Emp;
 use App\Models\Hit;
 use App\Models\Department;
 use App\Models\Employee;
@@ -56,33 +57,54 @@ class EmployeeController extends Controller
 
     public function exportPdf()
     {
-        // $endpoint = '/Export-PDF';
+        $files      = Storage::disk('public')->files('/emp');
+        $fileCount  = count($files);
 
-        // Hit::updateOrCreate(
-        //     ['endpoint' => $endpoint],
-        //     ['count' => \DB::raw('count + 1')]
-        // );
-
-        $chunkSize      = 1000;
-        $totalRecord    = Employee::count();
-        $numberOfChunk  = ceil($totalRecord /$chunkSize);
- 
-        for ($i=0; $i < $numberOfChunk ; $i += $chunkSize) { 
-            GeneratePdfChunk::dispatch($i * $chunkSize, $chunkSize, $i);
+        foreach ($files as $file) {
+            Storage::disk('public')->delete($file);
         }
 
-        // for ($i=0; $i < $numberOfChunk ; $i += $chunkSize) { 
-        //     $filePath = storage_path("app/public/exports/exported_chunk_{$i}.pdf");
-        //     if (file_exists($filePath)) {
-        //         // $merger->addFile($filePath);
-        //         MergePdfChunks::dispatch($i * $chunkSize, $chunkSize, $i);
-        //     } else {
-        //         \Log::error("File not found for merging: " . $filePath);
-        //     }
-        // }
+        // $totalRecords   = 1000;
+        // $chunkSize      = 200;
+        $chunkSize      = 1000;
+        $totalRecords    = Employee::count();
+        $numberOfChunk  = ceil($totalRecord /$chunkSize);
         
+        for ($i = 0; $i < $totalRecords; $i += $chunkSize) {
+            $sumRecord = ($i+ + $chunkSize);
+            GeneratePdfChunk::dispatch($i, $i + $chunkSize - 1, $totalRecords, $sumRecord);
+        }
         
-        return response()->json(['message' => 'PDF export is being processed.']);
+        $totalFiles = $totalRecords / $chunkSize;
+        
+        if($fileCount <= $totalFiles ){
+            
+            // Storage file pdf on folder
+            $folderPath = '/public/emp';
+            $pdfFiles   = Storage::files($folderPath);
+            
+            // Filter only PDF files
+            $pdfFiles = array_filter($pdfFiles, function ($file) {
+                return pathinfo($file, PATHINFO_EXTENSION) === 'pdf';
+            });
+
+            $merger = new Merger;
+
+            // Add each PDF file to the merger
+            foreach ($pdfFiles as $index => $pdfFile) {
+
+                $fileContent = Storage::get($pdfFile);
+                $merger->addRaw($fileContent);
+
+            }
+
+            $mergedPdf      = $merger->merge();
+            $mergedPdfPath  = Storage::disk('public')->put('/merger/merged_report_emp.pdf', $mergedPdf);
+            
+            return response()->json(['message' => 'PDFs Merged Successfully', 'download_url' => storage_path('app/public/merger/merged_report.pdf')]);
+        }
+
+        // return response()->json(['message' => 'PDF export is being processed.']);
     }
 
     public function textGenereatePdf()

@@ -8,49 +8,66 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use PDF;
 
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Emp;
 
 class GeneratePdfChunk implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
     protected $start;
-    protected $chunkSize;
-    protected $chunkNumber;
+    protected $end;
+    protected $totalRecords;
+    protected $sumRecord;
 
-    public function __construct($start, $chunkSize, $chunkNumber)
+    public function __construct($start, $end, $totalRecords, $sumRecord)
     {
         $this->start        = $start;
-        $this->chunkSize    = $chunkSize;
-        $this->chunkNumber  = $chunkNumber;
+        $this->end          = $end;
+        $this->totalRecords = $totalRecords;
+        $this->sumRecord    = $sumRecord;
     }
 
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
     public function handle()
     {
         ini_set('memory_limit', '1G');
         ini_set('max_execution_time', 0);
         
-        $data = Emp::skip($this->start)->take($this->chunkSize)->get();
+        $cacheKey = 'pdf_merge_progress'; 
+        Cache::put($cacheKey, 0); 
 
-        if ($data->isEmpty()) {
-            return; 
+        for ($i = $this->start; $i <= $this->end; $i += 1000) {
+
+            $data = $this->generateData($i, $i + 999);
+            $from = $i;
+            $to   = $i+999;
+
+            $pdf = PDF::loadView('Export.employee_pdf', compact('data', 'from', 'to'))->output();
+
+            $batchFileName = "/public/emp/batch_".$i."_to_" . $i + 999 .".pdf";
+            Storage::put($batchFileName, $pdf);
+
+            // Cache count
+            $cacheKey = 'pdf_merge_progress'; 
+            $progress = intval(($this->sumRecord / $this->totalRecords) * 100);
+            Cache::put($cacheKey, $progress);
         }
 
-        $pdf = PDF::loadView('Export.employee_pdf', ['employee' => $data]);
+        Cache::put($cacheKey, 100);
 
-        $filePath = storage_path("app/public/exports/exported_chunk_{$this->chunkNumber}.pdf");
-        $pdf->save($filePath);
+    }
+
+    protected function generateData($start, $end)
+    {
+        $data = DB::table('emp')
+            ->skip($start)
+            ->take($end)
+            ->get();
+
+        return $data;
     }
 }
