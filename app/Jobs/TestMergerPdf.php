@@ -10,6 +10,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 
+use iio\libmergepdf\Merger;
+
 class TestMergerPdf implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -19,9 +21,10 @@ class TestMergerPdf implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    protected $pdfFiles;
+    public function __construct($pdfFiles)
     {
-        //
+        $this->pdfFiles  = $pdfFiles;
     }
 
     /**
@@ -31,18 +34,17 @@ class TestMergerPdf implements ShouldQueue
      */
     public function handle()
     {
-        $pdfFiles = Storage::disk('public')->files('/reports');
+        $merger = new Merger;
 
-        // Add each PDF chunk to the merger
-        foreach ($pdfFiles as $pdfFile) {
-            $filePath = storage_path('app/reports/' . $pdfFile);
-            $merger->addFile($filePath);
+        foreach ($pdfFiles as $index => $pdfFile) {
+
+            $fileContent = Storage::get($pdfFile);
+            $merger->addRaw($fileContent);
+
         }
 
-        // Merge and store the final PDF
-        $mergedPdf = $merger->merge();
-
-        // Save the merged PDF to a file
-        Storage::disk('public')->put('/merger/pdf_chunks/merged_report.pdf', $mergedPdf);
+        $mergedPdf      = $merger->merge();
+        $mergedPdfPath  = Storage::disk('public')->put('/merger/merged_report_emp.pdf', $mergedPdf);
+        
     }
 }

@@ -11,6 +11,7 @@ use App\Jobs\GeneratePdfChunk;
 use App\Jobs\MergePdfChunks;
 
 use App\Jobs\TestGeneratePdf;
+use App\Jobs\TestMergerPdf;
 
 use App\Models\Emp;
 use App\Models\Hit;
@@ -76,7 +77,6 @@ class EmployeeController extends Controller
         }
         
         $totalFiles = $totalRecords / $chunkSize;
-        
         if($fileCount <= $totalFiles ){
             
             // Storage file pdf on folder
@@ -140,18 +140,7 @@ class EmployeeController extends Controller
                 return pathinfo($file, PATHINFO_EXTENSION) === 'pdf';
             });
 
-            $merger = new Merger;
-
-            // Add each PDF file to the merger
-            foreach ($pdfFiles as $index => $pdfFile) {
-
-                $fileContent = Storage::get($pdfFile);
-                $merger->addRaw($fileContent);
-
-            }
-
-            $mergedPdf      = $merger->merge();
-            $mergedPdfPath  = Storage::disk('public')->put('/merger/merged_report.pdf', $mergedPdf);
+            TestMergerPdf::dispatch($pdfFiles);
             
             return response()->json(['message' => 'PDFs Merged Successfully', 'download_url' => storage_path('app/public/merger/merged_report.pdf')]);
         }
@@ -165,34 +154,4 @@ class EmployeeController extends Controller
         $progress = Cache::get('pdf_merge_progress', 0);
         return response()->json(['progress' => $progress]);
     }
-
-    // public function textGenereatePdf()
-    // {
-    //     ini_set('memory_limit', '1G');
-    //     ini_set('max_execution_time', 0);
-        
-    //     $data = []; // Fetch or generate your 200 million records here
-
-    //     // For demonstration, let's assume we only need the structure here
-    //     for ($i = 1; $i <= 10000; $i++) {
-    //         $data[] = (object)[
-    //             'id' => $i,
-    //             'name' => 'User ' . $i,
-    //             'email' => 'user' . $i . '@example.com'
-    //         ];
-            
-    //         // Dispatch the job every certain amount of data to avoid memory issues
-    //         if (count($data) >= 100) {
-    //             TestGeneratePdf::dispatch($data);
-    //             $data = []; // Reset the array
-    //         }
-    //     }
-
-    //     // Handle any remaining data
-    //     if (!empty($data)) {
-    //         TestGeneratePdf::dispatch($data);
-    //     }
-
-    //     return response()->json(['message' => 'PDF generation started']);
-    // }
 }
