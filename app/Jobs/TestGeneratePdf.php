@@ -28,12 +28,11 @@ class TestGeneratePdf implements ShouldQueue
     protected $totalRecords;
     protected $sumRecord;
 
-    public function __construct($start, $end, $totalRecords, $sumRecord)
+    public function __construct($start, $end, $totalRecords)
     {
         $this->start        = $start;
         $this->end          = $end;
         $this->totalRecords = $totalRecords;
-        $this->sumRecord    = $sumRecord;
     }
 
     /**
@@ -51,18 +50,18 @@ class TestGeneratePdf implements ShouldQueue
         $cacheKey = 'pdf_merge_progress'; 
         Cache::put($cacheKey, 0); 
 
-        for ($i = $this->start; $i <= $this->end; $i += 1000) {
+        for ($i = $this->start; $i <= $this->end; $i += $this->totalRecords) {
 
-            $data = $this->generateData($i, $i + 999);
+            $data = $this->generateData($this->start, $this->end);
 
             $pdf = PDF::loadView('Test.template', compact('data'))->output();
 
-            $batchFileName = "/public/reports/batch_".$i."_to_" . $i + 999 .".pdf";
+            $batchFileName = "/public/reports/batch_".$this->start."_to_" . $this->end .".pdf";
             Storage::put($batchFileName, $pdf);
 
             // Cache count
             $cacheKey = 'pdf_merge_progress'; 
-            $progress = intval(($this->sumRecord / $this->totalRecords) * 100);
+            $progress = intval(($this->start / $this->totalRecords) * 100);
             Cache::put($cacheKey, $progress);
 
             // $pdfMerger->addRaw(Storage::get($batchFileName));

@@ -24,12 +24,11 @@ class GeneratePdfChunk implements ShouldQueue
     protected $totalRecords;
     protected $sumRecord;
 
-    public function __construct($start, $end, $totalRecords, $sumRecord)
+    public function __construct($start, $end, $totalRecords)
     {
         $this->start        = $start;
         $this->end          = $end;
         $this->totalRecords = $totalRecords;
-        $this->sumRecord    = $sumRecord;
     }
 
     public function handle()
@@ -42,18 +41,18 @@ class GeneratePdfChunk implements ShouldQueue
 
         for ($i = $this->start; $i <= $this->end; $i += 1000) {
 
-            $data = $this->generateData($i, $i + 999);
-            $from = $i;
-            $to   = $i+999;
+            $data = $this->generateData($this->start, $this->end);
+            $from = $this->start;
+            $to   = $this->end;
 
             $pdf = PDF::loadView('Export.employee_pdf', compact('data', 'from', 'to'))->output();
 
-            $batchFileName = "/public/emp/batch_".$i."_to_" . $i + 999 .".pdf";
+            $batchFileName = "/public/emp/batch_".$this->start."_to_" . $this->end .".pdf";
             Storage::put($batchFileName, $pdf);
 
             // Cache count
             $cacheKey = 'pdf_merge_progress'; 
-            $progress = intval(($this->sumRecord / $this->totalRecords) * 100);
+            $progress = intval(($this->start / $this->totalRecords) * 100);
             Cache::put($cacheKey, $progress);
         }
 

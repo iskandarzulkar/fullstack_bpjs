@@ -71,10 +71,11 @@ class EmployeeController extends Controller
         $chunkSize       = 1000;
         $totalRecords    = Employee::count();
         $numberOfChunk   = ceil($totalRecords /$chunkSize);
-
+        
         for ($i = 0; $i < $totalRecords; $i += $chunkSize) {
-            $sumRecord = ($i+ + $chunkSize);
-            GeneratePdfChunk::dispatch($i, $i + $chunkSize - 1, $totalRecords, $sumRecord);
+            // $sumRecord = ($i+ + $chunkSize);
+            // GeneratePdfChunk::dispatch($i, $i + $chunkSize - 1, $totalRecords, $sumRecord);
+            GeneratePdfChunk::dispatch($i+1, $i + $chunkSize, $totalRecords);
         }
         
         $totalFiles = $totalRecords / $chunkSize;
@@ -108,13 +109,9 @@ class EmployeeController extends Controller
 
         $totalRecords   = 1000;
         $chunkSize      = 200;
-
-        // $progress = intval(($this->totalRecords / $records) * 100);
         
         for ($i = 0; $i < $totalRecords; $i += $chunkSize) {
-            $sumRecord = ($i+ + $chunkSize);
-            TestGeneratePdf::dispatch($i, $i + $chunkSize - 1, $totalRecords, $sumRecord);
-            // TestGeneratePdf::dispatch($i, $i + $chunkSize - 1, $totalRecords, $sumRecord);
+            TestGeneratePdf::dispatch($i+1, $i + $chunkSize, $totalRecords);
         }
 
         $totalFiles = $totalRecords / $chunkSize;
