@@ -22,11 +22,11 @@ class MergePdfChunks implements ShouldQueue
      *
      * @return void
      */
-    protected $chunkCount;
+    protected $pdfFiles;
 
-    public function __construct($chunkCount)
+    public function __construct($pdfFiles)
     {
-        $this->chunkCount = $chunkCount;
+        $this->pdfFiles  = $pdfFiles;
     }
 
     /**
@@ -39,45 +39,15 @@ class MergePdfChunks implements ShouldQueue
         ini_set('memory_limit', '1G');
         ini_set('max_execution_time', 0);
 
-        $merger = new Merger();
+        $merger = new Merger;
 
-        // for ($i = 0; $i < $this->chunkCount; $i++) {
-        //     // $pdfMerger->addPDF(storage_path("/app/public/exports/exported_chunk_{$i}.pdf"), 'all');
-        //     $batchFileName = "/exports/exported_chunk_{$i}.pdf";
-        //     // $filePath = storage_path("app/pdfs/chunk_{$i}.pdf");
-        //     // Storage::put($batchFileName);
-        //     // $pdfMerger->addRaw(Storage::get($batchFileName));
-        //     $pdfMerger->addFile(storage_path($batchFileName));
-        // }
-        
-        // $mergedPdf = $pdfMerger->merge();
-
-        // // Save the final merged PDF
-        // Storage::put('/public/merge/final_merged_output.pdf', $mergedPdf);
-
-        for ($i = 0; $i < $this->chunkCount; $i++) {
-            $filePath = storage_path("app/public/exports/exported_chunk_{$i}.pdf");
-            if (file_exists($filePath)) {
-                $merger->addFile($filePath);
-            } else {
-                \Log::error("File not found for merging: " . $filePath);
-            }
+        // Add each PDF file to the merger
+        foreach ($this->pdfFiles as $index => $pdfFile) {
+            $fileContent = Storage::get($pdfFile);
+            $merger->addRaw($fileContent);
         }
 
-        $outputPath = storage_path('app/public/merge/merged.pdf');
-        Storage::put($outputPath);
-        // $merger->merge()->save($outputPath);
-
-        // Optionally clean up the chunk files if not needed
-        for ($i = 0; $i < $this->chunkCount; $i++) {
-            $filePath = storage_path("app/public/exports/exported_chunk_{$i}.pdf");
-            if (file_exists($filePath)) {
-                unlink($filePath); // Delete the chunk file
-            }
-        }
-
-        \Log::info("Merged PDF saved to: " . $outputPath);
-
-
+        $mergedPdf      = $merger->merge();
+        $mergedPdfPath  = Storage::disk('public')->put('/merger/merged_report_emp.pdf', $mergedPdf);
     }
 }

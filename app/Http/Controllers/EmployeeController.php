@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
 use App\Jobs\FakerEmployeeJob;
+
 use App\Jobs\GeneratePdfChunk;
 use App\Jobs\MergePdfChunks;
 
@@ -67,10 +68,11 @@ class EmployeeController extends Controller
 
         // $totalRecords   = 1000;
         // $chunkSize      = 200;
-        $chunkSize      = 1000;
+        $chunkSize       = 1000;
         $totalRecords    = Employee::count();
-        $numberOfChunk  = ceil($totalRecord /$chunkSize);
-        
+        $numberOfChunk   = ceil($totalRecords /$chunkSize);
+        // dd($numberOfChunk);
+
         for ($i = 0; $i < $totalRecords; $i += $chunkSize) {
             $sumRecord = ($i+ + $chunkSize);
             GeneratePdfChunk::dispatch($i, $i + $chunkSize - 1, $totalRecords, $sumRecord);
@@ -88,18 +90,7 @@ class EmployeeController extends Controller
                 return pathinfo($file, PATHINFO_EXTENSION) === 'pdf';
             });
 
-            $merger = new Merger;
-
-            // Add each PDF file to the merger
-            foreach ($pdfFiles as $index => $pdfFile) {
-
-                $fileContent = Storage::get($pdfFile);
-                $merger->addRaw($fileContent);
-
-            }
-
-            $mergedPdf      = $merger->merge();
-            $mergedPdfPath  = Storage::disk('public')->put('/merger/merged_report_emp.pdf', $mergedPdf);
+            MergePdfChunks::dispatch($pdfFiles);
             
             return response()->json(['message' => 'PDFs Merged Successfully', 'download_url' => storage_path('app/public/merger/merged_report.pdf')]);
         }
