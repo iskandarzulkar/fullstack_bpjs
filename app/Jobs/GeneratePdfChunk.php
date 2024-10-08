@@ -34,7 +34,7 @@ class GeneratePdfChunk implements ShouldQueue
 
     public function handle()
     {
-        ini_set('memory_limit', '1G');
+        ini_set('memory_limit', '2G');
         ini_set('max_execution_time', 0);
         
         $cacheKey = 'pdf_merge_progress'; 

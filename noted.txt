@@ -1,6 +1,9 @@
 before que = 15.74 detik
 after que  = 
 
+CREATE VIEW emp AS SELECT employees.id, employees.firstname, employees.lastname, employees.email, employees.address, employees.id_department, departments.name from employees join departments on employees.id_department = departments.id;
+
 run php artisan queue:work
 php artisan queue:work --stop-when-empty
 php artisan queue:listen
+php artisan queue:listen --timeout=1200 --memory=255

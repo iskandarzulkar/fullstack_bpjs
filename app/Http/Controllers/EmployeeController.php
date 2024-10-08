@@ -71,7 +71,6 @@ class EmployeeController extends Controller
         $chunkSize       = 1000;
         $totalRecords    = Employee::count();
         $numberOfChunk   = ceil($totalRecords /$chunkSize);
-        // dd($numberOfChunk);
 
         for ($i = 0; $i < $totalRecords; $i += $chunkSize) {
             $sumRecord = ($i+ + $chunkSize);
